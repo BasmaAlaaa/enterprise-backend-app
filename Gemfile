@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.0.3'
+ruby '3.3.0'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.0.5"
@@ -21,7 +21,7 @@ gem 'sidekiq', '~> 7.2'
 gem 'sidekiq-cron', '~> 1.12.0'
 gem 'google-ads-googleads', '~> 29.0.0'
 gem 'google-api-client', '~> 0.53.0'
-gem 'signet' , '~> 0.19.0'
+gem 'signet' , '~> 0.20'
 
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem "importmap-rails"
@@ -34,7 +34,7 @@ gem "stimulus-rails"
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
-gem 'ruby-openai', '~> 7.0.1'
+gem 'ruby-openai', '~> 8.1'
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
@@ -49,7 +49,7 @@ gem 'ruby-openai', '~> 7.0.1'
 gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 
 # Reduces boot times through caching; required in config/boot.rb
-gem "bootsnap", require: false
+gem 'bootsnap', '>= 1.16', require: false
 
 gem 'rack-cors', :require => 'rack/cors'
 gem 'devise', '4.9.3'
@@ -63,9 +63,9 @@ gem 'omniauth-facebook' ,'9.0.0'
 gem 'kaminari', '1.2.2'
 gem 'active_model_serializers', '~> 0.10.0'
 gem 'interactor', '~> 3.1', '>= 3.1.2'
-gem 'shopify_app',  '~> 21.10'
+gem 'shopify_app', '~> 22.5.1'
 
-gem  'jwt', '2.7.1'
+gem 'jwt', '~> 3.1'
 
 gem 'stripe', '8.7.0'
 # Use Sass to process CSS
@@ -95,7 +95,7 @@ end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
+  gem 'capybara', '~> 3.39.2'
   gem "selenium-webdriver"
   gem "webdrivers"
   
