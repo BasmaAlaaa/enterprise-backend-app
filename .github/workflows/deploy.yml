@@ -1,0 +1,153 @@
+name: Deploy to prod EC2
+
+on:
+  workflow_dispatch: # This enables manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: enterprice
+        
+      - name: Checkout another repository
+        uses: actions/checkout@v4
+        with:
+          repository: Cortechs-ai/tf-account-live
+          ref: main
+          token: ${{ secrets.GH_PAT }}
+          path: tf-account-live
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: "1.5.0"
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Get Current Deployment
+        run: |
+          cd tf-account-live/tf-env/prod/02-enterprise/00-backend/03-deployment-status
+          terraform init
+          ENVIRONMENT=$(terraform output -raw environment)
+          echo "Environment is $ENVIRONMENT"
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+
+      - name: Use the Environment Variable
+        run: |
+          echo "Using the captured environment: $ENVIRONMENT"
+
+      - name: create new environment
+        run: |
+          if [[ "$ENVIRONMENT" == "green" ]]; then
+            TARGET_ENV="blue"
+          else
+            TARGET_ENV="green"
+          fi
+          echo "creating environment $TARGET_ENV"
+          cd tf-account-live/tf-env/prod/02-enterprise/00-backend/00-$TARGET_ENV
+          terraform init
+          terraform apply --auto-approve
+          DEPLOYMENTMIP=$(terraform output -raw publicIP)
+          echo "DEPLOYMENTMIP=$DEPLOYMENTMIP" >> $GITHUB_ENV
+          INSTANCEID=$(terraform output -raw instance-id)
+          echo "INSTANCEID=$INSTANCEID" >> $GITHUB_ENV
+
+      - name: Sleep for 60 seconds
+        run: sleep 60
+
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.DEPLOYMENTMIP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo systemctl stop enterprise
+            sudo systemctl stop sidekiq
+            export PATH="/root/.asdf/shims:$PATH"
+            REPO_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Cortechs-ai/proscripe-enterprise-backend.git" 
+            TARGET_DIR="/home/ubuntu/proscripe-enterprise-backend/"
+            cd "$TARGET_DIR"
+            pwd
+            git remote set-url origin "$REPO_URL"
+            git pull origin main
+            sudo /root/.asdf/shims/bundle install
+            sudo systemctl start enterprise.service
+            sudo systemctl start sidekiq
+
+      - name: Check if service is active
+        id: service_check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.DEPLOYMENTMIP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            if systemctl is-active --quiet enterprise && systemctl is-active --quiet sidekiq; then
+              echo "Service is running. Proceeding with the switch."
+            else
+              echo "Service is NOT running. Deployment halted."
+              echo "::set-output name=status::failure"
+              exit 1  # Exit with error to halt this step
+            fi
+
+      - name: take ami
+        if: steps.service_check.outcome == 'success'
+        run: |
+          cd tf-account-live/tf-env/prod/02-enterprise/00-backend-ami
+          terraform init
+          terraform apply -var="instance_id=${INSTANCEID}" -auto-approve
+
+      - name: Switch DNS
+        if: steps.service_check.outcome == 'success'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.DEPLOYMENTMIP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo /root/setDNS.sh
+
+
+      - name: Delete Old Machine
+        if: steps.service_check.outcome == 'success'
+        run: |
+          cd tf-account-live/tf-env/prod/02-enterprise/00-backend/00-$ENVIRONMENT
+          terraform init
+          terraform destroy --auto-approve
+
+      - name: Change current deployment
+        if: steps.service_check.outcome == 'success'
+        run: |
+          if [[ "$ENVIRONMENT" == "green" ]]; then
+            TARGET_ENV="blue"
+          else
+            TARGET_ENV="green"
+          fi
+          cd tf-account-live/tf-env/prod/02-enterprise/00-backend/03-deployment-status
+          terraform init
+          terraform apply -var="environment=${TARGET_ENV}" -auto-approve
+
+      - name: Handle Service Check Failure
+        if: steps.service_check.outcome != 'success'
+        run: |
+          if [[ "$ENVIRONMENT" == "green" ]]; then
+            TARGET_ENV="blue"
+          else
+            TARGET_ENV="green"
+          fi
+          cd tf-account-live/tf-env/prod/02-enterprise/00-backend/00-$TARGET_ENV
+          terraform init
+          terraform destroy --auto-approve
+
+

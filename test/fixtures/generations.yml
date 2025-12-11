@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  integration: one
+  status: 1
+  generation_type: 1
+
+two:
+  integration: two
+  status: 1
+  generation_type: 1

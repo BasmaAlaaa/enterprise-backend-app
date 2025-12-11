@@ -1,0 +1,39 @@
+version: '3'
+services:
+  redis:
+    image: redis:7.2.3
+
+  sidekiq:
+    depends_on:
+      - db
+      - redis
+    build: .
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    env_file:
+      - .env
+    volumes:
+      - .:/myapp
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && rails s -b '0.0.0.0'"
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:  
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: proscripe
+
+volumes:
+  postgres_data:
