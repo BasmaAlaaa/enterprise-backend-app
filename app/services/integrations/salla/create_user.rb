@@ -17,7 +17,7 @@ module Integrations::Salla
       if user.new_record?
         user.assign_attributes(password: password, password_confirmation: password)
         user.save!
-        UserMailer.welcome_email(user, password).deliver_later
+        UserMailer.welcome_email(email, password).deliver_later
       end
 
       shop.update!(user: user)

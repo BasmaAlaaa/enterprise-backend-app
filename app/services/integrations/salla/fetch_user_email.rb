@@ -15,7 +15,6 @@ module Integrations
         response = HTTParty.get(url, headers: headers)
 
         if response.success?
-          Rails.logger.info("data returned from salla: #{response}")
           context.email = response.dig("data", "email")
         else
           fail!(message: "Failed to fetch user email: #{response.parsed_response}")
