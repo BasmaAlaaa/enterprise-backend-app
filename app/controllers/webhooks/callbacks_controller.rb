@@ -8,7 +8,7 @@ class Webhooks::CallbacksController < WebhooksController
       data = params[:data]
       result = case event
         when "app.store.authorize"
-          Integrations::Salla::Assign.call(access_token: data[:access_token], refresh_token: data[:refresh_token], scopes: data[:scope])
+          Integrations::Salla::Organizers::Assign.call(access_token: data[:access_token], refresh_token: data[:refresh_token], scopes: data[:scope])
         # when "app.uninstalled"
         #   Integrations::HandleStoreUninstall.call(integration: @integration)
         # when "app.subscription.started"

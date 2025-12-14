@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  self.inheritance_column = :role
+  has_one :shop, dependent: :destroy
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
 

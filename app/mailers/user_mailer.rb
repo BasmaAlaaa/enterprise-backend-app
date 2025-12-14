@@ -1,10 +1,14 @@
 class UserMailer < ApplicationMailer
-  default from: 'no-reply@example.com'
+  default from: 'admin@yozo.ai'
 
-  def welcome_email(email, password)
-    @email = email
+  def welcome_email(user, password)
+    @user = user
     @password = password
-    @url  = 'https://enterprise.yozo.ai/dashboard'
-    mail(to: email, subject: "Get Started with Scribe AI!")
+    @url = 'https://enterprise.yozo.ai/dashboard'
+
+    mail(
+      to: @user.email,
+      subject: 'Get Started with Scribe AI!'
+    )
   end
 end

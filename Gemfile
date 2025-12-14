@@ -66,6 +66,7 @@ gem 'interactor', '~> 3.1', '>= 3.1.2'
 gem 'shopify_app', '~> 22.5.1'
 gem 'connection_pool', '< 3.0'
 gem 'jwt', '~> 3.1'
+gem 'fast-mcp', github: 'yjacquin/fast-mcp', branch: 'mcp-2025-06-18'
 
 gem 'stripe', '8.7.0'
 # Use Sass to process CSS
