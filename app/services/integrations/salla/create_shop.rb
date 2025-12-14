@@ -22,7 +22,7 @@ module Integrations
 
         shop_email = email || data["email"]
 
-        shop.assign_attributes(name: data["name"], email: 'basmaalaa667@gmail.com', access_token: access_token, refresh_token: refresh_token, access_scopes: scopes)
+        shop.assign_attributes(name: data["name"], email: shop_email, access_token: access_token, refresh_token: refresh_token, access_scopes: scopes)
 
         shop.save!
 

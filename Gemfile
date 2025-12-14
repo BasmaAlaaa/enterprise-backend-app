@@ -81,6 +81,7 @@ group :development, :test do
   gem "rspec-rails", '6.1.1'
   gem "factory_bot_rails" , '6.4.3'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  gem "letter_opener"
 end
 
 group :development do
