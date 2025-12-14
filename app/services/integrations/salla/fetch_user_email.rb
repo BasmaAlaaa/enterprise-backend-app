@@ -3,7 +3,7 @@ module Integrations
     class FetchUserEmail
       include Interactor
 
-      delegate :access_token, to: :context
+      delegate :access_token, :fail!, to: :context
 
       def call
         url = 'https://api.salla.dev/admin/v2/oauth2/user/info'
@@ -16,9 +16,8 @@ module Integrations
 
         if response.success?
           context.email = response.dig("data", "email")
-          context.name = response.dig("data", "name")
         else
-          context.fail!(message: "Failed to fetch user email: #{response.parsed_response}")
+          fail!(message: "Failed to fetch user email: #{response.parsed_response}")
         end
       end
     end

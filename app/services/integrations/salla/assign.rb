@@ -3,7 +3,7 @@ module Integrations
     class Assign
       include Interactor::Organizer
 
-      organize Integrations::Salla::FetchStoreDomain, Integrations::Salla::FetchUserEmail, Integrations::Salla::AccessToken, Integrations::CreateAccountOwnerAndStatistics
+      organize Integrations::Salla::FetchUserEmail, Integrations::Salla::CreateShop
     end
   end
 end

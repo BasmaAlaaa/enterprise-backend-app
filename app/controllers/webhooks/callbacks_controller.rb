@@ -3,26 +3,22 @@ class Webhooks::CallbacksController < WebhooksController
   before_action :verify_signature, only: [:salla]
 
     def salla
-      Rails.logger.info("Salla easy mode event: #{params}")
       return success if params[:event].blank?
       event = params[:event]
       data = params[:data]
       result = case event
         when "app.store.authorize"
-          Rails.logger.info("Salla easy mode authorize event: #{data}")
-          Integrations::Salla::Assign.call(access_token: data[:access_token], refresh_token: data[:refresh_token], merchant_id: params[:merchant])
-        when "app.uninstalled"
-          Integrations::HandleStoreUninstall.call(integration: @integration)
-        when "app.subscription.started"
-          Integrations::Salla::HandleStoreSubscriptionStarted.call(params: params, integration: @integration)
-        # when "app.trial.started"
-        #   SubscriptionPlans::AssignFreePlan.call(user: @account_owner)
-        when "app.subscription.canceled"
-          SubscriptionPlans::Cancel.call(user: @account_owner)
-        when "app.subscription.renewed"
-          SubscriptionPlans::Renew.call(user: @account_owner, subscription: @subscription)
-        when "app.subscription.expired"
-          SubscriptionPlans::SubscriptionExpired.call(integration: @integration)
+          Integrations::Salla::Assign.call(access_token: data[:access_token], refresh_token: data[:refresh_token], scopes: data[:scope])
+        # when "app.uninstalled"
+        #   Integrations::HandleStoreUninstall.call(integration: @integration)
+        # when "app.subscription.started"
+        #   Integrations::Salla::HandleStoreSubscriptionStarted.call(params: params, integration: @integration)
+        # when "app.subscription.canceled"
+        #   SubscriptionPlans::Cancel.call(user: @account_owner)
+        # when "app.subscription.renewed"
+        #   SubscriptionPlans::Renew.call(user: @account_owner, subscription: @subscription)
+        # when "app.subscription.expired"
+        #   SubscriptionPlans::SubscriptionExpired.call(integration: @integration)
         else
           render json: { message: "Invalid event" }, status: :ok
           return
