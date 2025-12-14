@@ -17,8 +17,6 @@ module Integrations
         fail!(message: response.parsed_response) unless response.success?
 
         data = response["data"]
-        Rails.logger.info("data returned from salla2: #{data}")
-
 
         shop = Shop.find_or_initialize_by(provider: :salla,domain: data["domain"])
 
