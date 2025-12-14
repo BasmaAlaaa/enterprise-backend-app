@@ -8,9 +8,12 @@ Rails.application.configure do
   # it changes. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
-  config.hosts << "a20b-156-213-84-124.ngrok-free.app"
-  # Do not eager load code on boot.
   config.eager_load = false
+  config.hosts << /.*\.ngrok-free\.app/
+  config.hosts << /.*\.ngrok\.app/  
+  config.hosts << /.*\.?myshopify\.com/
+  config.hosts << /.*\.ngrok-free\.dev/
+  # Do not eager load code on boot.
 
   # Show full error reports.
   config.consider_all_requests_local = true

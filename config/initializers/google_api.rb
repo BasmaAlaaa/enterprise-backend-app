@@ -1,6 +1,0 @@
-require 'google/apis/webmasters_v3'
-require 'google/apis/indexing_v3'
-require 'googleauth'
-require 'googleauth/stores/file_token_store'
-require 'fileutils'
-require 'google/apis/errors'

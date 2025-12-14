@@ -5,14 +5,15 @@ default: &default
   host: <%= ENV.fetch("POSTGRES_HOST") %>
   username: <%= ENV.fetch("POSTGRES_USER") %>
   password: <%= ENV.fetch("POSTGRES_PASSWORD") %>
+  port: <%= ENV.fetch("POSTGRES_PORT") %>
 
 development:
   <<: *default
-  database: proscripe_development
+  database: enterprise_development
 
 test:
   <<: *default
-  database: proscripe_test
+  database: enterprise_test
 
 production:
   <<: *default

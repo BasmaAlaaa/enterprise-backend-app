@@ -1,27 +1,15 @@
 class Webhooks::CallbacksController < WebhooksController
   skip_before_action :verify_webhook
-  before_action :verify_signature, :set_account_owner, only: [:salla_easy_mode]
- 
-    def salla
-      result = Integrations::Salla::CustomAccessToken.call(code: params[:code])
-      if result.success?
-        create_statistics!(result.integration) unless result.integration.statistics.present?
-        response = Integrations::Salla::FetchUserEmail.call(access_token: result.integration.token)
-        if response.success?
-        UserMailer.welcome_email(response.email).deliver_later
-        end
-        redirect_to "#{ENV["FRONTEND_REDIRECT_URI"]}?shop_domain=#{result.integration.domain}&shop_tokens=#{result.integration.token}", allow_other_host: true
-      else
-        render json: {errors: result.errors}, status: :unprocessable_entity
-      end
-    end
+  before_action :verify_signature, only: [:salla]
 
-    def salla_easy_mode
+    def salla
+      Rails.logger.info("Salla easy mode event: #{params}")
       return success if params[:event].blank?
       event = params[:event]
       data = params[:data]
       result = case event
         when "app.store.authorize"
+          Rails.logger.info("Salla easy mode authorize event: #{data}")
           Integrations::Salla::Assign.call(access_token: data[:access_token], refresh_token: data[:refresh_token], merchant_id: params[:merchant])
         when "app.uninstalled"
           Integrations::HandleStoreUninstall.call(integration: @integration)
@@ -89,11 +77,5 @@ class Webhooks::CallbacksController < WebhooksController
       return false unless signature 
       expected_signature = OpenSSL::HMAC.hexdigest('SHA256', secret, request_body)
       ActiveSupport::SecurityUtils.secure_compare(signature, expected_signature)
-    end
-
-    def set_account_owner
-      @integration = Integration.find_by(integration_type: 'salla', merchant_id: params[:merchant])
-      @account_owner = @integration&.account_owner
-      @subscription = @account_owner&.subscription
     end
 end

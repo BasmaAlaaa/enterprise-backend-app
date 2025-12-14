@@ -2,8 +2,7 @@ class Api::UsersController < Api::BaseController
   before_action :set_user, only: [:show, :update, :destroy, :update_permissions]
 
   def index
-    users = policy_scope(TeamMember)
-    users = users.by_projects(params[:projects]) if params[:projects]
+    users = User.all
     users = users.by_name(params[:name]) if params[:name]
     paginate(users)
   end 
@@ -19,7 +18,7 @@ class Api::UsersController < Api::BaseController
   end
 
   def create
-    @user = current_user.team_members.new(user_params)
+    @user = User.new(user_params)
     authorize @user  # Calls UserPolicy#create?
     if @user.save
       render json: @user, status: :created

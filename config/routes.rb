@@ -29,8 +29,7 @@ Rails.application.routes.draw do
 
     resources :callbacks do 
       collection do
-        get :salla
-        post :salla_easy_mode
+        post :salla
         get :shopify
         get :shopify_direct_install
         post :wordpress

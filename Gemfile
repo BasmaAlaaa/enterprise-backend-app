@@ -64,7 +64,7 @@ gem 'kaminari', '1.2.2'
 gem 'active_model_serializers', '~> 0.10.0'
 gem 'interactor', '~> 3.1', '>= 3.1.2'
 gem 'shopify_app', '~> 22.5.1'
-
+gem 'connection_pool', '< 3.0'
 gem 'jwt', '~> 3.1'
 
 gem 'stripe', '8.7.0'
